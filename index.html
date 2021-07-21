@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>Hello Electron</title>
+  </head>
+  <body>
+    <!-- 所有NodeJS可用的API都可以通过renderer.js的process属性访问 -->
+    <h2>
+      当前Electron版本：
+      <script>
+        document.write(process.versions.electron);
+      </script>
+    </h2>
+    <h2>
+      当前NodeJS版本：<script>
+        document.write(process.versions.node);
+      </script>
+    </h2>
+    <h2>
+      当前Chromium版本：
+      <script>
+        document.write(process.versions.chrome);
+      </script>
+    </h2>
+    <button id="button" onclick="">开始录制</button>
+    <p id="recorder_address"></p>
+    <canvas id="local_view" style="width: 1280px; height: 720px;"></canvas>
+    <canvas id="remote_view" width="432" height="768"></canvas>
+    <script>
+      // 这里也可以包含运行在当前进程里的其它文件
+      require("./loop.js");
+    </script>
+  </body>
+</html>

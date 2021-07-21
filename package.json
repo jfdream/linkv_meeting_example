@@ -1,0 +1,25 @@
+{
+  "name": "linkv_electron",
+  "version": "1.0.0",
+  "description": "linkv electron demo",
+  "main": "index.js",
+  "scripts": {
+    "test": "test",
+    "start": "ELECTRON_DISABLE_SECURITY_WARNINGS=true electron ."
+  },
+  "dependencies": {
+    "linkv_rtc_engine": "1.0.5"
+  },
+  "keywords": [
+    "linkv",
+    "rtc",
+    "electron"
+  ],
+  "devDependencies": {
+    "electron-builder": "^22.11.7",
+    "electron-rebuild": "^2.3.5",
+    "electron": "v13.1.4"
+  },
+  "author": "badwin",
+  "license": "ISC"
+}
