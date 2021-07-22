@@ -27,7 +27,7 @@ button.onclick = function (event) {
   if (go) {
     let taskId = "taskId" + new Date().getTime();
     engine.setAVConfig({onlyProfile:true, profile:5});
-    engine.StartVVorkRecorder(taskId, 2);
+    engine.StartVVorkRecorder(taskId, "linkv/video", "linkv/image", 10, 2);
   }
   else{
     engine.StopVVorkRecorder();
@@ -59,7 +59,7 @@ engine.auth("5291372290", "f5e9cfc87f7d9c41e8b495419e315bc0", "yangyudong", func
 
 let remoteDir = "linkv/mac";
 let localDir = "/Users/liveme/Desktop/electron_recorder/";
-engine.setRecorderConfig("https://lp-api-demo.linkv.fun/v1/utils/presign", "yangyudong", "linkv/video", "linkv/image", 10, localDir, function (taskId, thumbnails, url) {
+engine.setRecorderConfig("https://lp-api-demo.linkv.fun/v1/utils/presign", "yangyudong", localDir, function (taskId, thumbnails, url) {
   // body...
   console.log(taskId, url);
   m3u8_p.innerHTML = "录制结果:" + url + "," + JSON.stringify(thumbnails);

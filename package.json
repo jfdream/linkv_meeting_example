@@ -8,7 +8,7 @@
     "start": "ELECTRON_DISABLE_SECURITY_WARNINGS=true electron ."
   },
   "dependencies": {
-    "linkv_rtc_engine": "1.0.6"
+    "linkv_rtc_engine": "1.0.8"
   },
   "keywords": [
     "linkv",
