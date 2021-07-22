@@ -59,7 +59,7 @@ engine.auth("5291372290", "f5e9cfc87f7d9c41e8b495419e315bc0", "yangyudong", func
 
 let remoteDir = "linkv/mac";
 let localDir = "/Users/liveme/Desktop/electron_recorder/";
-engine.setRecorderConfig(remoteDir, localDir, function (taskId, thumbnails, url) {
+engine.setRecorderConfig("https://lp-api-demo.linkv.fun/v1/utils/presign", "yangyudong", "linkv/video", "linkv/image", 10, localDir, function (taskId, thumbnails, url) {
   // body...
   console.log(taskId, url);
   m3u8_p.innerHTML = "录制结果:" + url + "," + JSON.stringify(thumbnails);
