@@ -64,13 +64,11 @@ engine.auth("5291372290", "f5e9cfc87f7d9c41e8b495419e315bc0", "yangyudong", func
  	console.log("auth result:" + code);
 });
 
-engine.setUploadCallback(
-  function (url, file, header) {
-      console.log(url, file);
-      upload_p.innerHTML = "上传:" + url + "," + JSON.stringify(header);
-  });
-
 if (os.platform() === "win32") { 
+  engine.setUploadCallback(function (url, file, header) {
+    console.log(url, file);
+    upload_p.innerHTML = "上传:" + url + "," + JSON.stringify(header);
+  });
   let localDir = "E://work//linkv_rtc_electron//video/";
   engine.setRecorderConfig("http://lp-api-demo.linkv.fun/v1/utils/presign", "yangzg123456", localDir, 
   function (taskId, thumbnails, url) {
