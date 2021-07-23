@@ -5,10 +5,10 @@
   "main": "index.js",
   "scripts": {
     "test": "test",
-    "start": "ELECTRON_DISABLE_SECURITY_WARNINGS=true electron ."
+    "start": "electron ."
   },
   "dependencies": {
-    "linkv_rtc_engine": "1.0.8"
+    "linkv_rtc_engine": "1.0.10"
   },
   "keywords": [
     "linkv",
