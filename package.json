@@ -8,7 +8,7 @@
     "start": "electron ."
   },
   "dependencies": {
-    "linkv_rtc_engine": "1.0.10"
+    "linkv_rtc_engine": "1.0.11"
   },
   "keywords": [
     "linkv",
