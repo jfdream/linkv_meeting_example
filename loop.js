@@ -6,8 +6,6 @@ let os = require("os");
 /** render.js */
 const { app, BrowserWindow, crashReporter} = require("electron");
 
-const HTTP = require('./http');
-
 let result = engine.buildVersion();
 
 
@@ -16,9 +14,6 @@ const LinkVViewMode = {
     AspectFill: 1,
     ScaleToFill: 2,
 };
-
-
-let http = new HTTP();
 
 var go = false;
 
@@ -65,10 +60,6 @@ engine.auth("5291372290", "f5e9cfc87f7d9c41e8b495419e315bc0", "yangyudong", func
 });
 
 if (os.platform() === "win32") { 
-  engine.setUploadCallback(function (url, file, header) {
-    console.log(url, file);
-    upload_p.innerHTML = "上传:" + url + "," + JSON.stringify(header);
-  });
   let localDir = "E://work//linkv_rtc_electron//video/";
   engine.setRecorderConfig("http://lp-api-demo.linkv.fun/v1/utils/presign", "yangzg123456", localDir, 
   function (taskId, thumbnails, url) {
@@ -127,15 +118,6 @@ engine.on("OnCaptureVideoFrame", function (frame, width, height) {
 //引入内置fs模块
 engine.on("OnDrawFrame", function (userId, frame, width, height) {
   remoter_render.drawVideoFrame(frame, width, height);
-});
-
-engine.on("OnPutToS3", function (url, filePath, header) {
-    fs.readFile(filePath, (err, byte) => {
-        let file = byte;
-        http.PUT(url, header, file).then(function (okSp) {
-            console.log("上传成功");
-        });
-    });
 });
 
 engine.on("OnCaptureScreenVideoFrame", function (frame, width, height) {
