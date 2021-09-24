@@ -29,11 +29,11 @@ button.onclick = function (event) {
 
     engine.setAVConfig({fps:15, bitrate:1800, min_bitrate:600, videoDegradationPreference:0, videoCaptureWidth:1280, videoCaptureHeight:720, videoEncodeWidth:1280, videoEncodeHeight:720});
 
-    engine.startRecorder(taskId, "/vvork/1427466308800266240/video/", "/vvork/1427466308800266240/img/", 8,  2);
+    engine.StartVVorkRecorder(taskId, "/vvork/1427466308800266240/video/", "/vvork/1427466308800266240/img/", 8,  2);
     console.log("start record");
   }
   else{
-    engine.stopRecorder();
+    engine.StopVVorkRecorder();
     console.log("stop record");
   }
 }
@@ -138,8 +138,8 @@ console.log({info2});
 engine.initCameraCapture(info[0].cameraName, info2[0].colorFormat, info1[2].width, info1[2].height);
 
 engine.startCapture();
-
 */
+
 
 
 
