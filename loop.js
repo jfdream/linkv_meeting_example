@@ -54,10 +54,10 @@ remoter_render.setViewMode(LinkVViewMode.AspectFit);
 engine.setISOCountryCode("CN");
 
 // appId,  skStr, userId, callback, 0 为成功
-engine.auth("5291372290", "f5e9cfc87f7d9c41e8b495419e315bc0", "yangyudong", function (code) {
+// engine.auth("5291372290", "f5e9cfc87f7d9c41e8b495419e315bc0", "yangyudong", function (code) {
 
- 	console.log("auth result:" + code);
-});
+//  	console.log("auth result:" + code);
+// });
 
 if (os.platform() === "win32") { 
   let localDir = "E://work//linkv_rtc_electron//video/";
@@ -67,10 +67,10 @@ if (os.platform() === "win32") {
     m3u8_p.innerHTML = "录制结果:" + url + "," + JSON.stringify(thumbnails);
   });
 } else {
-  let localDir = "/Users/liveme/Desktop/electron_recorder/";
-  engine.setRecorderConfig("https://lp-api-demo.linkv.fun/v1/utils/presign", "yangyudong", localDir, function (taskId, thumbnails, url) {
+  let localDir = "/Users/liveme/Desktop/electron_recorder";
+  engine.setRecorderConfig("https://lp-api-demo.linkv.fun/v1/utils/presign", "1451629eeedc0c37e750403122b78028f47b5a35", localDir, function (taskId, thumbnails, url, duration) {
     // body...
-    console.log(taskId, url);
+    console.log(taskId, url, duration);
     m3u8_p.innerHTML = "录制结果:" + url + "," + JSON.stringify(thumbnails);
   });
 }
@@ -125,17 +125,19 @@ engine.on("OnCaptureScreenVideoFrame", function (frame, width, height) {
 });
 
 
-engine.InitCapture(1);
+// engine.InitCapture(1);
 
-let info = engine.GetWindowsList();
+// let info = engine.GetWindowsList();
 
-engine.StartScreenCapture(info[1].id, 15);
+// console.log("============>",info);
 
-/*
-engine.initCameraCapture("Logitech HD Webcam C270", "I420", 1280, 720);
+// engine.StartScreenCapture(info[1].id, 15);
+
+
+// engine.initCameraCapture("Logitech HD Webcam C270", "I420", 1280, 720);
 
 engine.startCapture();
-*/
+
 
 
 

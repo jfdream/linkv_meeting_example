@@ -3,11 +3,6 @@
 /** main.js */
 const { app, BrowserWindow, crashReporter} = require("electron");
 
-
-
-// app.commandLine.appendArgument("--enable-features=Metal");
-crashReporter.start({ submitURL: 'http://localhost:1127' })
-
  let log = crashReporter.getLastCrashReport();
  let path = app.getPath('crashDumps');
  console.log(path);
