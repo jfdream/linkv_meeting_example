@@ -21,7 +21,7 @@ app.on("ready", () => {
   mainWindow.setMenu(null);
 
   mainWindow.loadFile("index.html"); // 隐藏Chromium菜单
-  mainWindow.webContents.openDevTools() // 开启调试模式
+  // mainWindow.webContents.openDevTools() // 开启调试模式
 
   mainWindow.on("closed", () => {
     mainWindow = null;

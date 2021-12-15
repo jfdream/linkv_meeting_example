@@ -12,7 +12,7 @@
     "dist": "electron-builder"
   },
   "dependencies": {
-    "linkv_rtc_engine": "1.0.41"
+    "linkv_rtc_engine": "1.0.97"
   },
   "keywords": [
     "linkv",
