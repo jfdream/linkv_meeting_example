@@ -33,11 +33,13 @@ function testRecorder(){
   if (go) {
     let taskId = "taskId" + new Date().getTime();
     engine.setAVConfig({fps:15, bitrate:1800, min_bitrate:600, videoDegradationPreference:0, videoCaptureWidth:1280, videoCaptureHeight:720, videoEncodeWidth:1280, videoEncodeHeight:720});
-    engine.startRecorderDevices();
-    engine.startRecorder(taskId, "/vvork/1427466308800266240/video/", "/vvork/1427466308800266240/img/", 10,  2);
+    if (os.platform() != "darwin") {
+      engine.startRecorderDevices();
+    }
+    engine.StartVVorkRecorder(taskId, "/vvork/1427466308800266240/video/", "/vvork/1427466308800266240/img/", 10,  2);
   }
   else{
-    engine.stopRecorder();
+    engine.StopVVorkRecorder();
   }
 }
 
@@ -109,9 +111,9 @@ engine.on("OnDrawFrame", function (userId, frame, width, height) {
   remoter_render.drawVideoFrame(frame, width, height);
 });
 
-engine.on("OnCaptureScreenVideoFrame", function (frame, width, height) {
-  local_render.drawVideoFrame(frame, width, height);
-});
+// engine.on("OnCaptureScreenVideoFrame", function (frame, width, height) {
+//   local_render.drawVideoFrame(frame, width, height);
+// });
 
 // function testCameraCapture(){
   let info = engine.GetVideoCaptureDevice();
@@ -139,19 +141,17 @@ let toneLevel = 50;
 engine.SetBeautyParameter(enable, beautyLevel, brightLevel, toneLevel)
 
 function testSnapshotWindows(){
-  engine.InitCapture(0);
+  engine.InitCapture2(1, 1280, 720, {x:0,y:0, width:0, height:0});
   let winList = engine.GetWindowsList();
   console.log(winList);
-  let imgList = engine.SnapshotWindows(winList);
-  console.log(imgList);
-  let img = imgList[0];
-  console.log(img);
-  local_render.drawVideoFrame(img.buffer, img.width, img.height);
+
+  engine.StartScreenCapture(winList[0].id, 15);
 }
 
 
 
 let list = engine.GetAudioCaptureDevice();
+testSnapshotWindows();
 console.log(list);
 
 
