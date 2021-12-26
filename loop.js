@@ -115,7 +115,7 @@ engine.on("OnDrawFrame", function (userId, frame, width, height) {
 //   local_render.drawVideoFrame(frame, width, height);
 // });
 
-// function testCameraCapture(){
+function testCameraCapture(){
   let info = engine.GetVideoCaptureDevice();
   console.log(info);
   
@@ -131,7 +131,7 @@ engine.on("OnDrawFrame", function (userId, frame, width, height) {
   }
   
   engine.startCapture();
-// }
+}
 
 let enable = true;
 let beautyLevel = 50;
@@ -151,6 +151,7 @@ function testSnapshotWindows(){
 
 
 let list = engine.GetAudioCaptureDevice();
+testCameraCapture();
 testSnapshotWindows();
 console.log(list);
 
