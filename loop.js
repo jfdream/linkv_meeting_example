@@ -1,160 +1,245 @@
-const engine = require('linkv_rtc_engine');
-const WebGLRender = require('linkv_rtc_engine/render');
+const engine = require('linkv_rtc_meeting');
+const WebGLRender = require('linkv_rtc_meeting/render');
+
 const fs = require("fs");
 let os = require("os");
 
-/** render.js */
-const { app, BrowserWindow, crashReporter} = require("electron");
+const {AppEnvironment, LVStreamType, LVViewMode} = require('./Constants');
 
-let result = engine.buildVersion();
-const LinkVViewMode = {
-    AspectFit: 0,
-    AspectFill: 1,
-    ScaleToFill: 2,
-};
-
-
-
-let button = document.getElementById("button");
-let m3u8_p = document.getElementById("recorder_address");
-let upload_p = document.getElementById("upload_address");
-
-engine.setAVConfig({fps:15, bitrate:3000, videoCaptureWidth:640, videoCaptureHeight:480, videoEncodeWidth:1280, videoEncodeHeight: 720});
-button.onclick = function (event) {
-  console.log(event);
-  testRecorder();
-  // testCameraCapture();
-  // testSnapshotWindows();
-}
-
-var go = false;
-function testRecorder(){
-  go = !go;
-  if (go) {
-    let taskId = "taskId" + new Date().getTime();
-    engine.setAVConfig({fps:15, bitrate:1800, min_bitrate:600, videoDegradationPreference:0, videoCaptureWidth:1280, videoCaptureHeight:720, videoEncodeWidth:1280, videoEncodeHeight:720});
-    if (os.platform() != "darwin") {
-      engine.startRecorderDevices();
-    }
-    engine.StartVVorkRecorder(taskId, "/vvork/1427466308800266240/video/", "/vvork/1427466308800266240/img/", 10,  2);
-  }
-  else{
-    engine.StopVVorkRecorder();
-  }
-}
-
-let local_render = new WebGLRender();
-let local_canvas = document.getElementById('local_view');
-local_render.initGLfromCanvas(local_canvas);
-local_render.setViewMode(LinkVViewMode.AspectFill);
-local_render.setMirrorEnable(false);
-
-let remoter_render = new WebGLRender();
-let remoter_canvas = document.getElementById('remote_view');
-remoter_render.initGLfromCanvas(remoter_canvas);
-remoter_render.setViewMode(LinkVViewMode.AspectFit);
-
+engine.setUseTestEnv(false);
+engine.setLogLevel(1);
 engine.setISOCountryCode("CN");
 
+let isMac = (os.platform() === "darwin");
+let isWin = (os.platform() === "win32");
 
-let localDir = "E://work//linkv_rtc_electron//video/";
-if (os.platform() === "darwin") {
-  localDir = "/Users/badwin/Desktop/electron_recorder";
-  engine.setRecorderConfig("https://api-qa.vvork.net/v1/utils/presign", "test14b9952af71e702519e7222f562d7535e9de", localDir, "yangyudong", function (taskId, thumbnails, url, duration, size, encode_width, encode_height) {
-    // body...
-    console.log(taskId, url, duration);
-    m3u8_p.innerHTML = "录制结果:" + url + "," + JSON.stringify(thumbnails);
+
+console.log("sdkversion:", engine.buildVersion());
+console.log("appid:", AppEnvironment.TEST_ENVIR, "app sign:", AppEnvironment.TEST_ENVIR_SIGN);
+engine.auth(AppEnvironment.RTC_TEST_ENVIR, AppEnvironment.RTC_TEST_TEST_ENVIR_SIGN, "Electron", function (code) {
+  console.log("Auth ret:", code);
+});
+
+
+let join_button = document.getElementById("button_join");
+let leave_button = document.getElementById("button_leave");
+
+
+let roomIdInput = document.getElementById("roomId_input");
+let userIdInput = document.getElementById("userId_input");
+
+let USER_ID = "H"+AppEnvironment.USER_ID;
+
+engine.setAVConfig({fps:15, bitrate:800, min_bitrate:300, videoCaptureWidth:1280, videoCaptureHeight:720, videoEncodeWidth:192, videoEncodeHeight: 144});
+
+join_button.onclick = function (event) {
+  if (roomIdInput.value || roomIdInput.value != undefined) {
+    engine.loginRoom(USER_ID, roomIdInput.value, true, false, 3);
+  }
+  else{
+    engine.loginRoom(USER_ID, AppEnvironment.ROOM_ID, true, false, 3);
+  }
+  engine.startSoundLevelMonitor(50);
+}
+
+leave_button.onclick = function (event) {
+  engine.logoutRoom();
+}
+
+let camera_render = new WebGLRender();
+let camera_canvas = document.getElementById('camera_view');
+if (!isMac) camera_render.setupI420();
+camera_render.initGLfromCanvas(camera_canvas);
+camera_render.setViewMode(LVViewMode.AspectFill);
+camera_render.setMirrorEnable(false);
+
+let screen_render = new WebGLRender();
+let screen_canvas = document.getElementById('screen_view');
+if (!isMac&&!isWin) screen_render.setupI420();
+screen_render.initGLfromCanvas(screen_canvas);
+screen_render.setViewMode(LVViewMode.AspectFit);
+
+// 0,1 存储第一个加入的人的摄像头和屏幕
+// 2,3 存储第二个加入的人的摄像头和屏幕，如果需要增加多人，可一次添加视图即可
+// 不支持第三个人
+var remote_views = [];
+var remote_views_info = {};
+var current_members = 0;
+
+
+function startPublishing() {
+  engine.startPublishing([LVStreamType.AUDIO_NORMAL, LVStreamType.VIDEO_TINY, LVStreamType.VIDEO_NORMAL, LVStreamType.VIDEO_SCREENCAST]) 
+}
+
+
+function create_remote_views() {
+  for (var i = 1; i < 5; i++) {
+    let remote_render = new WebGLRender();
+    let viewId = 'remote_view' + i;
+    let remote_canvas = document.getElementById(viewId);
+    console.log(viewId);
+    if (!isMac) remote_render.setupI420();
+    remote_render.initGLfromCanvas(remote_canvas);
+    remote_render.setViewMode(LVViewMode.AspectFit);
+    remote_views.push(remote_render);
+  }
+}
+create_remote_views();
+
+
+if (isMac) {
+  engine.on("OnCaptureVideoFrame", function (frame, width, height) {
+    camera_render.drawVideoFrame(frame, width, height);
   });
 }
 else{
-  engine.setRecorderConfig("http://lp-api-demo.linkv.fun/v1/utils/presign", "test14b9952af71e702519e7222f562d7535e9de", localDir, "yangyudong", 
-    function (taskId, thumbnails, url, duration, size, encode_width, encode_height) {
-      console.log(taskId, url, duration);
-      m3u8_p.innerHTML = "录制结果:" + url + "," + JSON.stringify(thumbnails);
+  engine.on("OnCaptureVideoFrame", function (Y, U, V, width, height) {
+    camera_render.drawI420VideoFrame(width, height, Y, U, V);
   });
-  engine.setLogLevel(3)
 }
 
-console.log("sdkversion:" + result);
+if (isMac) {
+  engine.on("OnDrawFrame", function (userId, frame, width, height, streamType) {
+    let id = remote_views_info[userId];
+    console.log(userId, remote_views_info, streamType);
+    if (id == 0) {
+      if (streamType == 2) {
+        remote_views[0].drawVideoFrame(frame, width, height);
+      }
+      else{
+        remote_views[1].drawVideoFrame(frame, width, height);
+      }
+    }
+    else{
+      if (streamType == 2) {
+        remote_views[2].drawVideoFrame(frame, width, height);
+      }
+      else{
+        remote_views[3].drawVideoFrame(frame, width, height);
+      }
+    }
+  });
+}
+else{
+  engine.on("OnDrawFrame", function (userId, Y, U, V, width, height, streamType) {
+    let id = remote_views_info[userId];
+    console.log(userId, remote_views_info, streamType);
+    if (id == 0) {
+      if (streamType == 2) {
+        remote_views[0].drawI420VideoFrame(width, height, Y, U, V);
+      }
+      else{
+        remote_views[1].drawI420VideoFrame(width, height, Y, U, V);
+      }
+    }
+    else{
+      if (streamType == 2) {
+        remote_views[2].drawI420VideoFrame(width, height, Y, U, V);
+      }
+      else{
+        remote_views[3].drawI420VideoFrame(width, height, Y, U, V);
+      }
+    }
+  });
+}
 
-engine.on("OnEnterRoomComplete", function (code, list) {
-  console.log("join room code:" , code , "  list:" , list);
-  engine.startPublishing();
-});
-
-engine.on("OnPublishStateUpdate", function (state) {
-  console.log("OnPublishStateUpdate:" + state);
-});
-
-engine.on("OnRoomReconnected", function (code) {
-  console.log("OnRoomReconnected: " + code);
+engine.on("OnCaptureScreenVideoFrame", function (frame, width, height) {
+  screen_render.drawVideoFrame(frame, width, height);
+  console.log("width:", width, "height:", height);
 });
 
 engine.on("OnAddRemoter", function (member) {
-    console.log(member);
-    engine.startPlayingStream(member.userId);
+  console.log(member);
+  if (member.userId == USER_ID) {
+    console.log(member.userId, USER_ID);
+    return;
+  }
+  if (current_members >= 2) return;
+  remote_views_info[member.userId] = current_members;
+  if ((member.msids & 8) != 0) {
+    engine.startPlayingStream(member.userId, [1,2,8]);
+  }
+  else{
+    engine.startPlayingStream(member.userId, [1,2]);
+  }
+  current_members++;
 });
 
-engine.on("OnDeleteRemoter", function (member) {
-    console.log(member);
+
+engine.on("OnDeleteRemoter", function (userId) {
+  console.log(userId);
+  current_members--;
+  engine.stopPlayingStream(userId, [1,2,8]);
+})
+
+
+engine.on("OnEnterRoomComplete", function (code, userList) {
+  console.log("code:", code, "userList", userList);
+  current_members = 0;
+  startPublishing();
 });
 
-engine.on("OnPublishQualityUpdate", function (quality) {
-  console.log(quality);
+engine.on("OnUpdateStream", function (userId, addlist, removelist) {
+  if (addlist.length > 0) {
+    engine.startPlayingStream(userId, addlist);
+  }
+  else if(removelist.length > 0){
+    engine.stopPlayingStream(userId, addlist);
+  }
 });
 
-engine.on("OnCaptureVideoFrame", function (frame, width, height) {
-  local_render.drawVideoFrame(frame, width, height);
-});
+engine.on("OnAudioVolumeUpdate", function (volume){
 
-engine.on("OnDrawFrame", function (userId, frame, width, height) {
-  remoter_render.drawVideoFrame(frame, width, height);
 });
-
-// engine.on("OnCaptureScreenVideoFrame", function (frame, width, height) {
-//   local_render.drawVideoFrame(frame, width, height);
-// });
 
 function testCameraCapture(){
   let info = engine.GetVideoCaptureDevice();
   console.log(info);
-  
   if (os.platform() === "darwin") {
-    engine.initCameraCapture(info[0], "0", 1280, 720);
+    engine.initCameraCapture(info[0].guid, "0", 1280, 720);
   }
   else{
-    let info1 = engine.GetCameraResolution(info[0]);
+    let info1 = engine.GetCameraResolution(info[0].guid);
     console.log(info1);
-    let info2 = engine.GetCameraColorType(info1[17].width, info1[17].height);
+    let info2 = engine.GetCameraColorType(info[0].guid, info1[0].width, info1[0].height);
     console.log(info2);
-    engine.initCameraCapture(info[0], info2[1], 1280, 720);
+    engine.initCameraCapture(info[0].guid, info2[0], 1280, 720);
   }
-  
   engine.startCapture();
 }
 
-let enable = true;
-let beautyLevel = 50;
-let brightLevel = 50;
-let toneLevel = 50;
 
-engine.SetBeautyParameter(enable, beautyLevel, brightLevel, toneLevel)
+function testBeauty() {
+  let enable = true;
+  let beautyLevel = 50;
+  let brightLevel = 50;
+  let toneLevel = 50;
 
-function testSnapshotWindows(){
-  engine.InitCapture2(1, 1280, 720, {x:0,y:0, width:0, height:0});
-  let winList = engine.GetWindowsList();
-  console.log(winList);
+  engine.SetBeautyParameter(enable, beautyLevel, brightLevel, toneLevel)
+}
 
+function testScreenCapture(){
+
+  let winList = engine.GetWindowsList(0);
+  let list = engine.SnapshotWindows([winList[0].id], 0);
+  console.log("============>",list," SourceId:",winList[0].id);
+
+  engine.SetMouseCursorEnable(true);
+  engine.InitCapture(0, 1280, 720, {x:0, y:0, width:0, height:0});
   engine.StartScreenCapture(winList[0].id, 15);
 }
 
 
+// 设备是否打开 AI
+// engine.SetAIEnable(true);
+// engine.SetModelPath("/Users/badwin/Downloads/selfie_segmentation.tflite");
+// engine.SetBackgroundImage("/Users/badwin/Downloads/image.png");
+// // AI 模型
+// engine.SetAiModel(
+//   "/Users/badwin/Documents/joyme/linkv_rtc_electron/sdk/mac/Resources/model/ai_human_processor_pc.bundle", 
+//   "/Users/badwin/Documents/joyme/linkv_rtc_electron/sdk/mac/Resources/graphics/face_beautification.bundle", 
+//   "/Users/badwin/Documents/joyme/linkv_rtc_electron/sdk/mac/Resources/items/BackgroundSegmentation/xiandai_ztt_fu.bundle");
 
-let list = engine.GetAudioCaptureDevice();
 testCameraCapture();
-testSnapshotWindows();
-console.log(list);
-
-
-
-
+testScreenCapture();
+// testBeauty();

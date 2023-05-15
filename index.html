@@ -23,10 +23,31 @@
         document.write(process.versions.chrome);
       </script>
     </h2>
-    <button id="button" onclick="">开始录制</button>
-    <p id="recorder_address"></p>
-    <canvas id="local_view" style="width: 1280px; height: 720px;"></canvas>
-    <canvas id="remote_view" width="432" height="768"></canvas>
+    <div style="display: inline;">
+      <input placeholder="请输入房间 ID" id="roomId_input"> </input>
+      <input placeholder="请输入用户 ID（可选）" id="userId_input"> </input>
+    </div>
+    <br/>
+    <div style="display: inline;">
+      <button id="button_join" onclick="">加入房间</button>
+      <button id="button_leave" onclick="" style="margin-left: 250px;">离开房间</button>
+    </div>
+    <br/>
+    <div style="display: inline;">
+      <canvas id="camera_view" style="width: 320px; height: 180px; margin-top: 10px; background-color: black;"></canvas>
+      <canvas id="screen_view" style="width: 320px; height: 180px; margin-top: 10px; background-color: black;"></canvas>
+    </div>
+
+    <div style="display: inline;">
+      <canvas id="remote_view1" style="width: 320px; height: 180px; margin-top: 10px; background-color: black;"></canvas>
+      <canvas id="remote_view2" style="width: 320px; height: 180px; margin-top: 10px; background-color: black;"></canvas>
+    </div>
+
+    <div style="display: inline;">
+      <canvas id="remote_view3" style="width: 320px; height: 180px; margin-top: 10px; background-color: black;"></canvas>
+      <canvas id="remote_view4" style="width: 320px; height: 180px; margin-top: 10px; background-color: black;"></canvas>
+    </div>
+
     <script>
       // 这里也可以包含运行在当前进程里的其它文件
       require("./loop.js");
