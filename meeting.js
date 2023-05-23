@@ -103,7 +103,6 @@ else{
 if (isMac) {
   engine.on("OnDrawFrame", function (userId, frame, width, height) {
     let id = remote_views_info[userId];
-    console.log(userId, remote_views_info);
     if (id == 0) {
       remote_views[0].drawVideoFrame(frame, width, height);
     }
@@ -115,7 +114,6 @@ if (isMac) {
 else{
   engine.on("OnDrawFrame", function (userId, Y, U, V, width, height) {
     let id = remote_views_info[userId];
-    console.log(userId, remote_views_info);
     if (id == 0) {
       remote_views[0].drawI420VideoFrame(width, height, Y, U, V);
     }
