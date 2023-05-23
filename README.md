@@ -7,8 +7,8 @@ engine.setUseTestEnv(false);
 engine.setLogLevel(1);
 engine.setISOCountryCode("CN");
 
-
-engine.auth(AppEnvironment.RTC_TEST_ENVIR, AppEnvironment.RTC_TEST_TEST_ENVIR_SIGN, "Electron", function (code) {
+// 请务必传用户 ID 参数，否则会影响调度
+engine.auth(AppEnvironment.RTC_TEST_ENVIR, AppEnvironment.RTC_TEST_TEST_ENVIR_SIGN, AppEnvironment.USER_ID, function (code) {
   console.log("Auth ret:", code);
 });
 
