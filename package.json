@@ -12,7 +12,7 @@
     "dist": "electron-builder"
   },
   "dependencies": {
-    "linkv_rtc_meeting": "1.2.265"
+    "linkv_rtc_meeting": "1.2.266"
   },
   "keywords": [
     "linkv",

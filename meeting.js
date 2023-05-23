@@ -1,5 +1,7 @@
 const engine = require('linkv_rtc_meeting');
 const WebGLRender = require('linkv_rtc_meeting/render');
+// const engine = require('./build/Release/linkv_engine');
+// const WebGLRender = require('./render');
 let os = require("os");
 const {AppEnvironment, LVStreamType, LVViewMode} = require('./Constants');
 
@@ -193,7 +195,7 @@ function testCameraCapture(){
 }
 
 function testSnapshotWindows(){
-  let winList = engine.GetWindowsList(0);
+  let winList = engine.GetScreenList();
   let list = engine.SnapshotWindows([winList[0].id], 0);
   console.log("============>",list,"=========>", winList);
   engine.SetMouseCursorEnable(true);
@@ -203,7 +205,6 @@ function testSnapshotWindows(){
 
 testCameraCapture();
 testSnapshotWindows();
-
 
 
 
