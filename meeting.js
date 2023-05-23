@@ -89,6 +89,8 @@ create_remote_views();
 if (isMac) {
   engine.on("OnCaptureVideoFrame", function (frame, width, height) {
     camera_render.drawVideoFrame(frame, width, height);
+
+    // 采集到数据直接发送，业务层按需调用该接口发送视频帧
     engine.SendVideoFrame(frame, width * 4, width, height, "", 0);
   });
 }
@@ -99,46 +101,26 @@ else{
 }
 
 if (isMac) {
-  engine.on("OnDrawFrame", function (userId, frame, width, height, streamType) {
+  engine.on("OnDrawFrame", function (userId, frame, width, height) {
     let id = remote_views_info[userId];
-    console.log(userId, remote_views_info, streamType);
+    console.log(userId, remote_views_info);
     if (id == 0) {
-      if (streamType == 2) {
-        remote_views[0].drawVideoFrame(frame, width, height);
-      }
-      else{
-        remote_views[1].drawVideoFrame(frame, width, height);
-      }
+      remote_views[0].drawVideoFrame(frame, width, height);
     }
     else{
-      if (streamType == 2) {
-        remote_views[2].drawVideoFrame(frame, width, height);
-      }
-      else{
-        remote_views[3].drawVideoFrame(frame, width, height);
-      }
+      remote_views[2].drawVideoFrame(frame, width, height);
     }
   });
 }
 else{
-  engine.on("OnDrawFrame", function (userId, Y, U, V, width, height, streamType) {
+  engine.on("OnDrawFrame", function (userId, Y, U, V, width, height) {
     let id = remote_views_info[userId];
-    console.log(userId, remote_views_info, streamType);
+    console.log(userId, remote_views_info);
     if (id == 0) {
-      if (streamType == 2) {
-        remote_views[0].drawI420VideoFrame(width, height, Y, U, V);
-      }
-      else{
-        remote_views[1].drawI420VideoFrame(width, height, Y, U, V);
-      }
+      remote_views[0].drawI420VideoFrame(width, height, Y, U, V);
     }
     else{
-      if (streamType == 2) {
-        remote_views[2].drawI420VideoFrame(width, height, Y, U, V);
-      }
-      else{
-        remote_views[3].drawI420VideoFrame(width, height, Y, U, V);
-      }
+      remote_views[2].drawI420VideoFrame(width, height, Y, U, V);
     }
   });
 }

@@ -51,6 +51,18 @@ function startPublishing() {
 ```
 
 
+## PK 和取消 PK
+```
+// 由于支持多人 PK 团战，故需要传 roomId 和 userId
+
+// 对方房间 ID， 对方用户 ID
+engine.linkRoom(roomId, userId);
+
+// 取消 PK
+engine.unlinkRoom(roomId, userId);
+
+```
+
 
 ## 打开和关闭摄像头请参考 meeting.js 中的摄像头和屏幕相关代码
 ```js
@@ -62,6 +74,15 @@ testScreenCapture();
 ```
 
 
+## 主动发送视频数据
+
+```
+
+// SendVideoFrame(buff, stride, width, height, sei)
+// 第二个参数表示一行像素点占多少字节，如果数据是稠密的，一般是宽度的四倍， SEI 是用户自定义文本字符串，可以随视频帧传给对方用户
+engine.SendVideoFrame(frame, width * 4, width, height, "", 0);
+
+```
 
 
 ## 开始拉流
