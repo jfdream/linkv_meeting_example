@@ -1,9 +1,6 @@
 const engine = require('linkv_rtc_meeting');
 const WebGLRender = require('linkv_rtc_meeting/render');
-
-const fs = require("fs");
 let os = require("os");
-
 const {AppEnvironment, LVStreamType, LVViewMode} = require('./Constants');
 
 engine.setUseTestEnv(false);
@@ -34,10 +31,10 @@ engine.setAVConfig({fps:15, bitrate:800, min_bitrate:300, videoCaptureWidth:1280
 
 join_button.onclick = function (event) {
   if (roomIdInput.value || roomIdInput.value != undefined) {
-    engine.loginRoom(USER_ID, roomIdInput.value, true, false, 3);
+    engine.loginRoom(USER_ID, roomIdInput.value, true, false);
   }
   else{
-    engine.loginRoom(USER_ID, AppEnvironment.ROOM_ID, true, false, 3);
+    engine.loginRoom(USER_ID, AppEnvironment.ROOM_ID, true, false);
   }
   engine.startSoundLevelMonitor(50);
 }
@@ -68,7 +65,7 @@ var current_members = 0;
 
 
 function startPublishing() {
-  engine.startPublishing([LVStreamType.AUDIO_NORMAL, LVStreamType.VIDEO_TINY, LVStreamType.VIDEO_NORMAL, LVStreamType.VIDEO_SCREENCAST]) 
+  engine.startPublishing() 
 }
 
 
@@ -90,6 +87,7 @@ create_remote_views();
 if (isMac) {
   engine.on("OnCaptureVideoFrame", function (frame, width, height) {
     camera_render.drawVideoFrame(frame, width, height);
+    engine.SendVideoFrame(frame, width * 4, width, height, "", 0);
   });
 }
 else{
@@ -156,12 +154,7 @@ engine.on("OnAddRemoter", function (member) {
   }
   if (current_members >= 2) return;
   remote_views_info[member.userId] = current_members;
-  if ((member.msids & 8) != 0) {
-    engine.startPlayingStream(member.userId, [1,2,8]);
-  }
-  else{
-    engine.startPlayingStream(member.userId, [1,2]);
-  }
+  engine.startPlayingStream(member.userId);
   current_members++;
 });
 
@@ -169,7 +162,7 @@ engine.on("OnAddRemoter", function (member) {
 engine.on("OnDeleteRemoter", function (userId) {
   console.log(userId);
   current_members--;
-  engine.stopPlayingStream(userId, [1,2,8]);
+  engine.stopPlayingStream(userId);
 })
 
 
@@ -177,15 +170,6 @@ engine.on("OnEnterRoomComplete", function (code, userList) {
   console.log("code:", code, "userList", userList);
   current_members = 0;
   startPublishing();
-});
-
-engine.on("OnUpdateStream", function (userId, addlist, removelist) {
-  if (addlist.length > 0) {
-    engine.startPlayingStream(userId, addlist);
-  }
-  else if(removelist.length > 0){
-    engine.stopPlayingStream(userId, addlist);
-  }
 });
 
 engine.on("OnAudioVolumeUpdate", function (volume){
@@ -208,38 +192,20 @@ function testCameraCapture(){
   engine.startCapture();
 }
 
-
-function testBeauty() {
-  let enable = true;
-  let beautyLevel = 50;
-  let brightLevel = 50;
-  let toneLevel = 50;
-
-  engine.SetBeautyParameter(enable, beautyLevel, brightLevel, toneLevel)
-}
-
-function testScreenCapture(){
-
+function testSnapshotWindows(){
   let winList = engine.GetWindowsList(0);
   let list = engine.SnapshotWindows([winList[0].id], 0);
-  console.log("============>",list," SourceId:",winList[0].id);
-
+  console.log("============>",list,"=========>", winList);
   engine.SetMouseCursorEnable(true);
-  engine.InitCapture(0, 1280, 720, {x:0, y:0, width:0, height:0});
+  engine.InitCapture(0, 1280, 720, {x:0, y:0, width:1280, height:1280});
   engine.StartScreenCapture(winList[0].id, 15);
 }
 
-
-// 设备是否打开 AI
-// engine.SetAIEnable(true);
-// engine.SetModelPath("/Users/badwin/Downloads/selfie_segmentation.tflite");
-// engine.SetBackgroundImage("/Users/badwin/Downloads/image.png");
-// // AI 模型
-// engine.SetAiModel(
-//   "/Users/badwin/Documents/joyme/linkv_rtc_electron/sdk/mac/Resources/model/ai_human_processor_pc.bundle", 
-//   "/Users/badwin/Documents/joyme/linkv_rtc_electron/sdk/mac/Resources/graphics/face_beautification.bundle", 
-//   "/Users/badwin/Documents/joyme/linkv_rtc_electron/sdk/mac/Resources/items/BackgroundSegmentation/xiandai_ztt_fu.bundle");
-
 testCameraCapture();
-testScreenCapture();
-// testBeauty();
+testSnapshotWindows();
+
+
+
+
+
+
