@@ -127,11 +127,10 @@ else{
 
 engine.on("OnCaptureScreenVideoFrame", function (frame, width, height) {
   screen_render.drawVideoFrame(frame, width, height);
-  console.log("width:", width, "height:", height);
 });
 
 engine.on("OnAddRemoter", function (member) {
-  console.log(member);
+  console.log("OnAddRemoter:", member);
   if (member.userId == USER_ID) {
     console.log(member.userId, USER_ID);
     return;
@@ -144,14 +143,14 @@ engine.on("OnAddRemoter", function (member) {
 
 
 engine.on("OnDeleteRemoter", function (userId) {
-  console.log(userId);
+  console.log("OnDeleteRemoter:",userId);
   current_members--;
   engine.stopPlayingStream(userId);
 })
 
 
 engine.on("OnEnterRoomComplete", function (code, userList) {
-  console.log("code:", code, "userList", userList);
+  console.log("OnEnterRoomComplete code:", code, "userList", userList);
   current_members = 0;
   startPublishing();
 });
