@@ -91,7 +91,7 @@ if (isMac) {
     camera_render.drawVideoFrame(frame, width, height);
 
     // 采集到数据直接发送，业务层按需调用该接口发送视频帧
-    engine.SendVideoFrame(frame, width * 4, width, height, "", 0);
+    engine.SendVideoFrame(frame, width * 4, width, height, "");
   });
 }
 else{
