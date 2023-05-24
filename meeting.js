@@ -14,7 +14,7 @@ let isWin = (os.platform() === "win32");
 
 
 console.log("sdkversion:", engine.buildVersion());
-console.log("appid:", AppEnvironment.TEST_ENVIR, "app sign:", AppEnvironment.TEST_ENVIR_SIGN);
+console.log("appid:", AppEnvironment.TEST_ENVIR, "app sign:", AppEnvironment.TEST_ENVIR_SIGN, "arch:", os.arch());
 engine.auth(AppEnvironment.RTC_TEST_ENVIR, AppEnvironment.RTC_TEST_TEST_ENVIR_SIGN, "Electron", function (code) {
   console.log("Auth ret:", code);
 });
