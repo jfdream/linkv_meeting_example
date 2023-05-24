@@ -86,42 +86,22 @@ function create_remote_views() {
 create_remote_views();
 
 
-if (isMac) {
-  engine.on("OnCaptureVideoFrame", function (frame, width, height) {
-    camera_render.drawVideoFrame(frame, width, height);
+engine.on("OnCaptureVideoFrame", function (frame, width, height) {
+  camera_render.drawVideoFrame(frame, width, height);
 
-    // 采集到数据直接发送，业务层按需调用该接口发送视频帧
-    engine.SendVideoFrame(frame, width * 4, width, height, "");
-  });
-}
-else{
-  engine.on("OnCaptureVideoFrame", function (Y, U, V, width, height) {
-    camera_render.drawI420VideoFrame(width, height, Y, U, V);
-  });
-}
+  // 采集到数据直接发送，业务层按需调用该接口发送视频帧
+  engine.SendVideoFrame(frame, width * 4, width, height, "");
+});
 
-if (isMac) {
-  engine.on("OnDrawFrame", function (userId, frame, width, height) {
-    let id = remote_views_info[userId];
-    if (id == 0) {
-      remote_views[0].drawVideoFrame(frame, width, height);
-    }
-    else{
-      remote_views[2].drawVideoFrame(frame, width, height);
-    }
-  });
-}
-else{
-  engine.on("OnDrawFrame", function (userId, Y, U, V, width, height) {
-    let id = remote_views_info[userId];
-    if (id == 0) {
-      remote_views[0].drawI420VideoFrame(width, height, Y, U, V);
-    }
-    else{
-      remote_views[2].drawI420VideoFrame(width, height, Y, U, V);
-    }
-  });
-}
+engine.on("OnDrawFrame", function (userId, frame, width, height) {
+  let id = remote_views_info[userId];
+  if (id == 0) {
+    remote_views[0].drawVideoFrame(frame, width, height);
+  }
+  else{
+    remote_views[2].drawVideoFrame(frame, width, height);
+  }
+});
 
 engine.on("OnCaptureScreenVideoFrame", function (frame, width, height) {
   screen_render.drawVideoFrame(frame, width, height);
