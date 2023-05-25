@@ -1,10 +1,15 @@
-const engine = require('linkv_rtc_meeting');
-const WebGLRender = require('linkv_rtc_meeting/render');
-// const engine = require('./build/Release/linkv_engine');
-// const WebGLRender = require('./render');
-let os = require("os");
 const {AppEnvironment, LVStreamType, LVViewMode} = require('./Constants');
-
+var engine = null
+var WebGLRender = null
+if (AppEnvironment.IS_LOCAL_DEBUG) {
+  engine = require('./build/Release/linkv_engine');
+  WebGLRender = require('./render');
+}
+else {
+  engine = require('linkv_rtc_meeting');
+  WebGLRender = require('linkv_rtc_meeting/render');
+}
+let os = require("os");
 engine.setUseTestEnv(false);
 engine.setLogLevel(1);
 engine.setISOCountryCode("CN");
@@ -29,7 +34,7 @@ let userIdInput = document.getElementById("userId_input");
 
 let USER_ID = "H"+AppEnvironment.USER_ID;
 
-engine.setAVConfig({fps:15, bitrate:800, min_bitrate:300, videoCaptureWidth:1280, videoCaptureHeight:720, videoEncodeWidth:192, videoEncodeHeight: 144});
+engine.setAVConfig({fps:15, bitrate:1800, min_bitrate:600, videoCaptureWidth:1280, videoCaptureHeight:720, videoEncodeWidth:1280, videoEncodeHeight: 720});
 
 join_button.onclick = function (event) {
   if (roomIdInput.value || roomIdInput.value != undefined) {
@@ -47,14 +52,12 @@ leave_button.onclick = function (event) {
 
 let camera_render = new WebGLRender();
 let camera_canvas = document.getElementById('camera_view');
-if (!isMac) camera_render.setupI420();
 camera_render.initGLfromCanvas(camera_canvas);
 camera_render.setViewMode(LVViewMode.AspectFill);
 camera_render.setMirrorEnable(false);
 
 let screen_render = new WebGLRender();
 let screen_canvas = document.getElementById('screen_view');
-if (!isMac&&!isWin) screen_render.setupI420();
 screen_render.initGLfromCanvas(screen_canvas);
 screen_render.setViewMode(LVViewMode.AspectFit);
 
@@ -76,8 +79,6 @@ function create_remote_views() {
     let remote_render = new WebGLRender();
     let viewId = 'remote_view' + i;
     let remote_canvas = document.getElementById(viewId);
-    console.log(viewId);
-    if (!isMac) remote_render.setupI420();
     remote_render.initGLfromCanvas(remote_canvas);
     remote_render.setViewMode(LVViewMode.AspectFit);
     remote_views.push(remote_render);
@@ -85,11 +86,8 @@ function create_remote_views() {
 }
 create_remote_views();
 
-
 engine.on("OnCaptureVideoFrame", function (frame, width, height) {
   camera_render.drawVideoFrame(frame, width, height);
-
-  // 采集到数据直接发送，业务层按需调用该接口发送视频帧
   engine.SendVideoFrame(frame, width * 4, width, height, "");
 });
 
@@ -137,7 +135,8 @@ engine.on("OnAudioVolumeUpdate", function (volume){
 
 });
 
-function testCameraCapture(){
+function startCameraCapture(){
+  console.log("startCameraCapture");
   let info = engine.GetVideoCaptureDevice();
   console.log(info);
   if (os.platform() === "darwin") {
@@ -153,8 +152,9 @@ function testCameraCapture(){
   engine.startCapture();
 }
 
-function testSnapshotWindows(){
-  let winList = engine.GetScreenList();
+function startSnapshotWindows(){
+  console.log("startSnapshotWindows");
+  let winList = engine.GetWindowsList(0);
   let list = engine.SnapshotWindows([winList[0].id], 0);
   console.log("============>",list,"=========>", winList);
   engine.SetMouseCursorEnable(true);
@@ -162,8 +162,8 @@ function testSnapshotWindows(){
   engine.StartScreenCapture(winList[0].id, 15);
 }
 
-testCameraCapture();
-testSnapshotWindows();
+startCameraCapture();
+// startSnapshotWindows();
 
 
 
