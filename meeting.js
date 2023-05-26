@@ -19,7 +19,7 @@ let isWin = (os.platform() === "win32");
 
 
 console.log("sdkversion:", engine.buildVersion());
-console.log("appid:", AppEnvironment.TEST_ENVIR, "app sign:", AppEnvironment.TEST_ENVIR_SIGN, "arch:", os.arch());
+console.log("appid:", AppEnvironment.TEST_ENVIR, "app sign:", AppEnvironment.TEST_ENVIR_SIGN);
 engine.auth(AppEnvironment.RTC_TEST_ENVIR, AppEnvironment.RTC_TEST_TEST_ENVIR_SIGN, "Electron", function (code) {
   console.log("Auth ret:", code);
 });
@@ -34,7 +34,11 @@ let userIdInput = document.getElementById("userId_input");
 
 let USER_ID = "H"+AppEnvironment.USER_ID;
 
-engine.setAVConfig({fps:15, bitrate:1800, min_bitrate:600, videoCaptureWidth:1280, videoCaptureHeight:720, videoEncodeWidth:1280, videoEncodeHeight: 720});
+// 1920x1080 建议 bitrate: 2300,  min_bitrate: 900
+// 1280x720 建议 bitrate: 1800,  min_bitrate: 600
+// 960x540 建议 bitrate: 1200,  min_bitrate: 600
+
+engine.setAVConfig({fps:15, bitrate:1800, min_bitrate:600, videoEncodeWidth:1280, videoEncodeHeight: 720});
 
 join_button.onclick = function (event) {
   if (roomIdInput.value || roomIdInput.value != undefined) {
@@ -51,14 +55,12 @@ leave_button.onclick = function (event) {
 }
 
 let camera_render = new WebGLRender();
-let camera_canvas = document.getElementById('camera_view');
-camera_render.initGLfromCanvas(camera_canvas);
+camera_render.initGLfromCanvas(document.getElementById('camera_view'));
 camera_render.setViewMode(LVViewMode.AspectFill);
 camera_render.setMirrorEnable(false);
 
 let screen_render = new WebGLRender();
-let screen_canvas = document.getElementById('screen_view');
-screen_render.initGLfromCanvas(screen_canvas);
+screen_render.initGLfromCanvas(document.getElementById('screen_view'));
 screen_render.setViewMode(LVViewMode.AspectFit);
 
 // 0,1 存储第一个加入的人的摄像头和屏幕
@@ -92,13 +94,8 @@ engine.on("OnCaptureVideoFrame", function (frame, width, height) {
 });
 
 engine.on("OnDrawFrame", function (userId, frame, width, height) {
-  let id = remote_views_info[userId];
-  if (id == 0) {
-    remote_views[0].drawVideoFrame(frame, width, height);
-  }
-  else{
-    remote_views[2].drawVideoFrame(frame, width, height);
-  }
+  let viewId = remote_views_info[userId];
+  remote_views[viewId].drawVideoFrame(frame, width, height);
 });
 
 engine.on("OnCaptureScreenVideoFrame", function (frame, width, height) {
@@ -111,7 +108,7 @@ engine.on("OnAddRemoter", function (member) {
     console.log(member.userId, USER_ID);
     return;
   }
-  if (current_members >= 2) return;
+  if (current_members >= 4) return;
   remote_views_info[member.userId] = current_members;
   engine.startPlayingStream(member.userId);
   current_members++;
@@ -137,26 +134,24 @@ engine.on("OnAudioVolumeUpdate", function (volume){
 
 function startCameraCapture(){
   console.log("startCameraCapture");
-  let info = engine.GetVideoCaptureDevice();
-  console.log(info);
-  if (os.platform() === "darwin") {
-    engine.initCameraCapture(info[0].guid, "0", 1280, 720);
-  }
-  else{
-    let info1 = engine.GetCameraResolution(info[0].guid);
-    console.log(info1);
-    let info2 = engine.GetCameraColorType(info[0].guid, info1[0].width, info1[0].height);
-    console.log(info2);
-    engine.initCameraCapture(info[0].guid, info2[0], 1280, 720);
-  }
+  let devices = engine.GetVideoCaptureDevice();
+  console.log("devices:",devices);
+
+  let resolutions = engine.GetCameraResolution(devices[0].guid);
+  console.log("resolutions:",resolutions);
+
+  let colorTypes = engine.GetCameraColorType(devices[0].guid, resolutions[0].width, resolutions[0].height);
+  console.log("colorTypes:",colorTypes);
+  
+  engine.initCameraCapture(devices[0].guid, colorTypes[0], 1080, 1080);
   engine.startCapture();
 }
 
 function startSnapshotWindows(){
   console.log("startSnapshotWindows");
   let winList = engine.GetWindowsList(0);
-  let list = engine.SnapshotWindows([winList[0].id], 0);
-  console.log("============>",list,"=========>", winList);
+  let images = engine.SnapshotWindows([winList[0].id], 0);
+  console.log("winList:=========>", winList, "images:======>",images);
   engine.SetMouseCursorEnable(true);
   engine.InitCapture(0, 1280, 720, {x:0, y:0, width:1280, height:1280});
   engine.StartScreenCapture(winList[0].id, 15);
