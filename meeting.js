@@ -143,7 +143,7 @@ function startCameraCapture(){
   let colorTypes = engine.GetCameraColorType(devices[0].guid, resolutions[0].width, resolutions[0].height);
   console.log("colorTypes:",colorTypes);
   
-  engine.initCameraCapture(devices[0].guid, colorTypes[0], 1080, 1080);
+  engine.initCameraCapture(devices[0].guid, colorTypes[0], 500, 500);
   engine.startCapture();
 }
 
