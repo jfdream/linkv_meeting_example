@@ -90,7 +90,7 @@ create_remote_views();
 
 engine.on("OnCaptureVideoFrame", function (frame, width, height) {
   camera_render.drawVideoFrame(frame, width, height);
-  engine.SendVideoFrame(frame, width * 4, width, height, "");
+  // engine.SendVideoFrame(frame, width * 4, width, height, "");
 });
 
 engine.on("OnDrawFrame", function (userId, frame, width, height) {
@@ -100,6 +100,7 @@ engine.on("OnDrawFrame", function (userId, frame, width, height) {
 
 engine.on("OnCaptureScreenVideoFrame", function (frame, width, height) {
   screen_render.drawVideoFrame(frame, width, height);
+  engine.SendVideoFrame(frame, width * 4, width, height, "");
 });
 
 engine.on("OnAddRemoter", function (member) {
@@ -149,7 +150,13 @@ function startCameraCapture(){
 
 function startSnapshotWindows(){
   console.log("startSnapshotWindows");
-  let winList = engine.GetWindowsList(0);
+  let winList = null;
+  if (AppEnvironment.IS_LOCAL_DEBUG) {
+    winList = engine.GetWindowsList(0);
+  }
+  else {
+    winList = engine.GetScreenList();
+  }
   let images = engine.SnapshotWindows([winList[0].id], 0);
   console.log("winList:=========>", winList, "images:======>",images);
   engine.SetMouseCursorEnable(true);
@@ -158,7 +165,7 @@ function startSnapshotWindows(){
 }
 
 startCameraCapture();
-// startSnapshotWindows();
+startSnapshotWindows();
 
 
 
