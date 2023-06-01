@@ -48,6 +48,7 @@ join_button.onclick = function (event) {
     engine.loginRoom(USER_ID, AppEnvironment.ROOM_ID, true, false);
   }
   engine.startSoundLevelMonitor(50);
+  console.log("audio devices:", engine.GetAudioCaptureDevice());
 }
 
 leave_button.onclick = function (event) {
@@ -90,7 +91,7 @@ create_remote_views();
 
 engine.on("OnCaptureVideoFrame", function (frame, width, height) {
   camera_render.drawVideoFrame(frame, width, height);
-  // engine.SendVideoFrame(frame, width * 4, width, height, "");
+  engine.SendVideoFrame(frame, width * 4, width, height, "");
 });
 
 engine.on("OnDrawFrame", function (userId, frame, width, height) {
@@ -100,7 +101,7 @@ engine.on("OnDrawFrame", function (userId, frame, width, height) {
 
 engine.on("OnCaptureScreenVideoFrame", function (frame, width, height) {
   screen_render.drawVideoFrame(frame, width, height);
-  engine.SendVideoFrame(frame, width * 4, width, height, "");
+  // engine.SendVideoFrame(frame, width * 4, width, height, "");
 });
 
 engine.on("OnAddRemoter", function (member) {
