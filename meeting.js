@@ -50,6 +50,7 @@ join_button.onclick = function (event) {
     engine.loginRoom(USER_ID, AppEnvironment.ROOM_ID, true, false);
   }
   engine.startSoundLevelMonitor(50);
+  console.log("audio devices:", engine.GetAudioCaptureDevice());
 }
 
 leave_button.onclick = function (event) {
@@ -102,6 +103,7 @@ engine.on("OnDrawFrame", function (userId, frame, width, height) {
 
 engine.on("OnCaptureScreenVideoFrame", function (frame, width, height) {
   screen_render.drawVideoFrame(frame, width, height);
+  // engine.SendVideoFrame(frame, width * 4, width, height, "");
 });
 
 engine.on("OnAddRemoter", function (member) {
@@ -145,13 +147,19 @@ function startCameraCapture(){
   let colorTypes = engine.GetCameraColorType(devices[0].guid, resolutions[0].width, resolutions[0].height);
   console.log("colorTypes:",colorTypes);
   
-  engine.initCameraCapture(devices[0].guid, colorTypes[0], 1080, 1080);
+  engine.initCameraCapture(devices[0].guid, colorTypes[0], 500, 500);
   engine.startCapture();
 }
 
 function startSnapshotWindows(){
   console.log("startSnapshotWindows");
-  let winList = engine.GetWindowsList(0);
+  let winList = null;
+  if (AppEnvironment.IS_LOCAL_DEBUG) {
+    winList = engine.GetWindowsList(0);
+  }
+  else {
+    winList = engine.GetScreenList();
+  }
   let images = engine.SnapshotWindows([winList[0].id], 0);
   console.log("winList:=========>", winList, "images:======>",images);
   engine.SetMouseCursorEnable(true);
@@ -160,7 +168,7 @@ function startSnapshotWindows(){
 }
 
 startCameraCapture();
-// startSnapshotWindows();
+startSnapshotWindows();
 
 
 
