@@ -40,6 +40,8 @@ let USER_ID = "H"+AppEnvironment.USER_ID;
 
 engine.setAVConfig({fps:15, bitrate:1800, min_bitrate:600, videoEncodeWidth:1280, videoEncodeHeight: 720});
 
+// engine.mixStream({"width":1280, "height":100, "outputFps":90, "outputBitrate":43, "pushUrls":["12334"], "inputStreamList":[{"x":1, "y":2, "width":323, "height":433, "userId":"yangyudong"}], "outputBackgroundColor":"123","outputBackgroundImage":"4567"});
+
 join_button.onclick = function (event) {
   if (roomIdInput.value || roomIdInput.value != undefined) {
     engine.loginRoom(USER_ID, roomIdInput.value, true, false);
