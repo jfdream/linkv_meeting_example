@@ -12,7 +12,7 @@
     "dist": "electron-builder"
   },
   "dependencies": {
-    "linkv_rtc_meeting": "1.2.277"
+    "linkv_rtc_meeting": "1.2.302"
   },
   "keywords": [
     "linkv",
@@ -20,9 +20,8 @@
     "electron"
   ],
   "devDependencies": {
-    "electron-builder": "^22.11.7",
-    "electron-rebuild": "^2.3.5",
-    "electron": "v13.1.4"
+    "electron-builder": "^24.4.0",
+    "electron": "v25.1.1"
   },
   "build": {
     "appId": "sg.linkv.loom",
