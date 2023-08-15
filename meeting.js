@@ -10,7 +10,7 @@ else {
   WebGLRender = require('linkv_rtc_meeting/render');
 }
 let os = require("os");
-engine.setUseTestEnv(false);
+engine.setUseTestEnv(true);
 engine.setLogLevel(1);
 engine.setISOCountryCode("CN");
 
@@ -20,10 +20,15 @@ let isWin = (os.platform() === "win32");
 
 console.log("sdkversion:", engine.buildVersion());
 console.log("appid:", AppEnvironment.TEST_ENVIR, "app sign:", AppEnvironment.TEST_ENVIR_SIGN);
-engine.auth(AppEnvironment.RTC_TEST_ENVIR, AppEnvironment.RTC_TEST_TEST_ENVIR_SIGN, "Electron", function (code) {
+
+engine.SetForceUseSoftwareEncoder(true)
+
+engine.auth(AppEnvironment.TEST_ENVIR, AppEnvironment.TEST_ENVIR_SIGN, "Electron", function (code) {
   console.log("Auth ret:", code);
 });
 
+engine.StartAudioRecording();
+engine.SetAudioRecordFlag(0x04);
 
 let join_button = document.getElementById("button_join");
 let leave_button = document.getElementById("button_leave");
@@ -47,11 +52,14 @@ join_button.onclick = function (event) {
   else{
     engine.loginRoom(USER_ID, AppEnvironment.ROOM_ID, true, false);
   }
-  engine.startSoundLevelMonitor(50);
+
+  // engine.setAVConfig({videoEncodeWidth:720, videoEncodeHeight: 1280});
+  engine.startCapture();
 }
 
 leave_button.onclick = function (event) {
   engine.logoutRoom();
+  // engine.stopMixStream();
 }
 
 let camera_render = new WebGLRender();
@@ -88,9 +96,10 @@ function create_remote_views() {
 }
 create_remote_views();
 
-engine.on("OnCaptureVideoFrame", function (frame, width, height) {
+engine.on("OnCaptureVideoFrame", function (cameraId, frame, width, height) {
   camera_render.drawVideoFrame(frame, width, height);
   engine.SendVideoFrame(frame, width * 4, width, height, "");
+  // console.log("cameraId:", cameraId, " width:", width, " height:", height);
 });
 
 engine.on("OnDrawFrame", function (userId, frame, width, height) {
@@ -98,8 +107,17 @@ engine.on("OnDrawFrame", function (userId, frame, width, height) {
   remote_views[viewId].drawVideoFrame(frame, width, height);
 });
 
-engine.on("OnCaptureScreenVideoFrame", function (frame, width, height) {
+engine.on("OnCaptureScreenVideoFrame", function (windowId, frame, width, height) {
   screen_render.drawVideoFrame(frame, width, height);
+  console.log("OnCaptureScreenVideoFrame windowId:", windowId, "width:", width, "height:", height);
+});
+
+engine.on("OnCaptureWindowSizeDidChange", function (windowId, width, height) {
+  console.log("onCaptureWindowSizeDidChange width:", width, "height:", height);
+});
+
+engine.on("OnCaptureWindowActiveStateDidChange", function (windowId, isActive) {
+  console.log("onCaptureWindowActiveStateDidChange isActive:", isActive);
 });
 
 engine.on("OnAddRemoter", function (member) {
@@ -121,6 +139,9 @@ engine.on("OnDeleteRemoter", function (userId) {
   engine.stopPlayingStream(userId);
 })
 
+engine.on("OnPublishStateUpdate",function (code) {
+  engine.mixStream({"width":1280, "height":720, "outputFps":15, "outputBitrate":1800, "pushUrls":["http://www.baidu.com/rtmp.flv"], "inputStreamList":[{"x":0, "y":0, "width":1280, "height":720, "userId":"88990088"}], "outputBackgroundColor":"#783278","outputBackgroundImage":"http://www.baidu.com/rtmp.png"});
+})
 
 engine.on("OnEnterRoomComplete", function (code, userList) {
   console.log("OnEnterRoomComplete code:", code, "userList", userList);
@@ -129,8 +150,15 @@ engine.on("OnEnterRoomComplete", function (code, userList) {
 });
 
 engine.on("OnAudioVolumeUpdate", function (volume){
-
 });
+
+engine.on("OnCaptureAudioFrame", function (frame, sampleRate, channels, type){
+  // console.log(frame, sampleRate, channels, type);
+});
+
+engine.SetAudioRecordFlag(2);
+
+var cameraId = ""
 
 function startCameraCapture(){
   console.log("startCameraCapture");
@@ -142,25 +170,63 @@ function startCameraCapture(){
 
   let colorTypes = engine.GetCameraColorType(devices[0].guid, resolutions[0].width, resolutions[0].height);
   console.log("colorTypes:",colorTypes);
-  
-  engine.initCameraCapture(devices[0].guid, colorTypes[0], 500, 500);
+
+  cameraId = devices[0].guid;
+  engine.initCameraCapture(cameraId, colorTypes[0], 1080, 1080);
   engine.startCapture();
 }
 
+var sourceId = 0;
+
 function startSnapshotWindows(){
   console.log("startSnapshotWindows");
-  let winList = engine.GetWindowsList(0);
-  let images = engine.SnapshotWindows([winList[0].id], 0);
+  let winList = null;
+  if (AppEnvironment.IS_LOCAL_DEBUG) {
+    winList = engine.GetWindowsList(1);
+  }
+  else {
+    winList = engine.GetScreenList();
+  }
+  let images = engine.SnapshotWindows([winList[1].id], 1);
   console.log("winList:=========>", winList, "images:======>",images);
-  engine.SetMouseCursorEnable(true);
-  engine.InitCapture(0, 1280, 720, {x:0, y:0, width:1280, height:1280});
+  let image = images[0].buffer;
+  screen_render.drawVideoFrame(image, images[0].width, images[0].height);
+  // console.log("winList:=========>", winList, "images:======>",images);
+  // engine.SetMouseCursorEnable(true);
+  // engine.InitCapture(1, 1280, 720, {x:0, y:0, width:1280, height:1280});
+  // engine.SetWindowCaptureScaler(0.5);
+  // engine.StartScreenCapture(winList[0].id, 15);
+
+  engine.InitCapture(1, 1280, 720, {x:0, y:0, width:1280, height:1280});
+  engine.SetWindowCaptureScaler(0.5);
   engine.StartScreenCapture(winList[0].id, 15);
+
+  sourceId = winList[0].id
+}
+
+function startAudioRecording(){
+  console.log("audio devices:", engine.GetAudioCaptureDevice());
+  engine.StartAudioRecording();
 }
 
 startCameraCapture();
 // startSnapshotWindows();
+// startAudioRecording();
 
 
+var kk = 0;
 
+leave_button.onclick = function (event) {
+
+  // engine.stopCapture(cameraId);
+  winList = engine.GetWindowsList(1);
+  console.log(winList);
+  // engine.logoutRoom();
+  // engine.stopMixStream();
+  // engine.StopScreenCapture();
+  // startSnapshotWindows();
+    // engine.SetWindowCaptureScaler(sourceId, 0.5 + kk / 100.0);
+  kk = kk + 1;
+}
 
 
