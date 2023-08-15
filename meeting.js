@@ -45,6 +45,8 @@ let USER_ID = "H"+AppEnvironment.USER_ID;
 
 engine.setAVConfig({fps:15, bitrate:1800, min_bitrate:600, videoEncodeWidth:1280, videoEncodeHeight: 720});
 
+// engine.mixStream({"width":1280, "height":100, "outputFps":90, "outputBitrate":43, "pushUrls":["12334"], "inputStreamList":[{"x":1, "y":2, "width":323, "height":433, "userId":"yangyudong"}], "outputBackgroundColor":"123","outputBackgroundImage":"4567"});
+
 join_button.onclick = function (event) {
   if (roomIdInput.value || roomIdInput.value != undefined) {
     engine.loginRoom(USER_ID, roomIdInput.value, true, false);
@@ -52,9 +54,8 @@ join_button.onclick = function (event) {
   else{
     engine.loginRoom(USER_ID, AppEnvironment.ROOM_ID, true, false);
   }
-
-  // engine.setAVConfig({videoEncodeWidth:720, videoEncodeHeight: 1280});
-  engine.startCapture();
+  engine.startSoundLevelMonitor(50);
+  console.log("audio devices:", engine.GetAudioCaptureDevice());
 }
 
 leave_button.onclick = function (event) {
@@ -109,15 +110,7 @@ engine.on("OnDrawFrame", function (userId, frame, width, height) {
 
 engine.on("OnCaptureScreenVideoFrame", function (windowId, frame, width, height) {
   screen_render.drawVideoFrame(frame, width, height);
-  console.log("OnCaptureScreenVideoFrame windowId:", windowId, "width:", width, "height:", height);
-});
-
-engine.on("OnCaptureWindowSizeDidChange", function (windowId, width, height) {
-  console.log("onCaptureWindowSizeDidChange width:", width, "height:", height);
-});
-
-engine.on("OnCaptureWindowActiveStateDidChange", function (windowId, isActive) {
-  console.log("onCaptureWindowActiveStateDidChange isActive:", isActive);
+  // engine.SendVideoFrame(frame, width * 4, width, height, "");
 });
 
 engine.on("OnAddRemoter", function (member) {
@@ -182,12 +175,12 @@ function startSnapshotWindows(){
   console.log("startSnapshotWindows");
   let winList = null;
   if (AppEnvironment.IS_LOCAL_DEBUG) {
-    winList = engine.GetWindowsList(1);
+    winList = engine.GetWindowsList(0);
   }
   else {
     winList = engine.GetScreenList();
   }
-  let images = engine.SnapshotWindows([winList[1].id], 1);
+  let images = engine.SnapshotWindows([winList[0].id], 0);
   console.log("winList:=========>", winList, "images:======>",images);
   let image = images[0].buffer;
   screen_render.drawVideoFrame(image, images[0].width, images[0].height);
@@ -210,8 +203,7 @@ function startAudioRecording(){
 }
 
 startCameraCapture();
-// startSnapshotWindows();
-// startAudioRecording();
+startSnapshotWindows();
 
 
 var kk = 0;
