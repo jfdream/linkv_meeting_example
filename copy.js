@@ -61,5 +61,5 @@ var exists = function( src, dst, callback ){
  
 // 复制目录
 exports.default = async function(context) {
-    exists( './node_modules/linkv_rtc_engine/sdk/mac/LinkV.framework', './dist/mac/linkv_electron.app/Contents/Frameworks/LinkV.framework', copy);
+    // exists( './node_modules/linkv_rtc_engine/sdk/mac/LinkV.framework', './dist/mac/linkv_electron.app/Contents/Frameworks/LinkV.framework', copy);
 }
