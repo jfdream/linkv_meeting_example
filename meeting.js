@@ -54,7 +54,6 @@ join_button.onclick = function (event) {
   else{
     engine.loginRoom(USER_ID, AppEnvironment.ROOM_ID, true, false);
   }
-  engine.startSoundLevelMonitor(50);
   console.log("audio devices:", engine.GetAudioCaptureDevice());
 }
 
