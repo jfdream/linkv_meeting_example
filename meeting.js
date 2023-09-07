@@ -189,7 +189,7 @@ function startSnapshotWindows(){
   // engine.SetWindowCaptureScaler(0.5);
   // engine.StartScreenCapture(winList[0].id, 15);
 
-  engine.InitCapture(1, 1280, 720, {x:0, y:0, width:1280, height:1280});
+  engine.InitCapture(0, 1280, 720, {x:0, y:0, width:1280, height:1280});
   engine.SetWindowCaptureScaler(0.5);
   engine.StartScreenCapture(winList[0].id, 15);
 
