@@ -91,7 +91,7 @@ function create_remote_views() {
 }
 create_remote_views();
 
-engine.on("OnCaptureVideoFrame", function (frame, width, height) {
+engine.on("OnCaptureVideoFrame", function (cameraId, frame, width, height) {
   camera_render.drawVideoFrame(frame, width, height);
   engine.SendVideoFrame(frame, width * 4, width, height, "");
 });
@@ -101,7 +101,7 @@ engine.on("OnDrawFrame", function (userId, frame, width, height) {
   remote_views[viewId].drawVideoFrame(frame, width, height);
 });
 
-engine.on("OnCaptureScreenVideoFrame", function (frame, width, height) {
+engine.on("OnCaptureScreenVideoFrame", function (windowId, frame, width, height) {
   screen_render.drawVideoFrame(frame, width, height);
   // engine.SendVideoFrame(frame, width * 4, width, height, "");
 });
