@@ -8,7 +8,6 @@
     "start": "electron .",
     "pack": "electron-builder --dir",
     "postinstall":"electron-builder install-app-deps",
-    "postinstall-mac": "yes|cp -R  -H ./node_modules/linkv_rtc_engine/sdk/mac/LinkV.framework ./node_modules/electron/dist/Electron.app/Contents/Frameworks",
     "dist": "electron-builder"
   },
   "dependencies": {
@@ -20,7 +19,8 @@
     "electron"
   ],
   "devDependencies": {
-    "electron-builder": "^24.4.0",
+    "electron-builder": "^24.6.3",
+    "@electron/rebuild": "^3.2.10",
     "electron": "v25.1.1"
   },
   "build": {
