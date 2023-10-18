@@ -98,7 +98,7 @@ create_remote_views();
 
 engine.on("OnCaptureVideoFrame", function (cameraId, frame, width, height) {
   camera_render.drawVideoFrame(frame, width, height);
-  engine.SendVideoFrame(frame, width * 4, width, height, "");
+  // engine.SendVideoFrame(frame, width * 4, width, height, "");
   // console.log("cameraId:", cameraId, " width:", width, " height:", height);
 });
 
@@ -202,7 +202,7 @@ function startAudioRecording(){
 }
 
 startCameraCapture();
-startSnapshotWindows();
+// startSnapshotWindows();
 
 
 var kk = 0;
